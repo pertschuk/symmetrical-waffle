@@ -188,7 +188,7 @@ class BertModel(BaseModel):
             return candidates
 
     def rank(self, query: bytes, choices: List[Choice]) -> List[int]:
-        bodies = [choice.body for choice in choices]
+        bodies = [choice for choice in choices]
         actual_length = len(bodies)
         candidates = self.pad(bodies)
         self.input_q.put((query, bodies))

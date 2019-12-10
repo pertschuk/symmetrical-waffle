@@ -224,51 +224,47 @@ def batch_input(all_features):
     yield input_ids_batch, attention_mask_batch, token_type_ids_batch
 
 
-def rank(model, device, all_features):
-  # model.eval()
-  with torch.no_grad():
-    scores = []
-    for input_ids, attention_mask, token_type_ids in batch_input(all_features):
-      input_ids = torch.tensor(input_ids, dtype=torch.long).to(device, non_blocking=True)
-      attention_mask = torch.tensor(attention_mask).to(device, non_blocking=True)
-      token_type_ids = torch.tensor(token_type_ids).to(device, non_blocking=True)
-      logits = model(input_ids,
-                     attention_mask=attention_mask,
-                     token_type_ids=token_type_ids)[0]
-      scores.extend(np.reshape(logits.detach().cpu().numpy()[:, 1], (-1,)))
-    return scores, np.argsort(scores)[::-1]
+def eval(model):
+  # load_and_cache_eval()
+  qrels = []
 
+  with open('./qrels.dev.small.tsv', 'r') as qrels_file:
+    for line in tqdm(qrels_file, desc="loading qrels"):
+      qid, _, cid, _ = line.rstrip().split('\t')
+      qrels.append((qid, cid))
 
-def encode(tokenizer, query, choices):
-  # print("query: %s" % query)
-  # print("choices: %s" % choices)
-  all_inputs = [tokenizer.encode_plus(
-    query, choice.lower(), add_special_tokens=True, max_length=args.max_length) for choice in choices]
-  all_features = [inputs_to_features(inputs) for inputs in all_inputs]
-  return all_features
-
-
-def eval(device, model, tokenizer):
-  load_and_cache_eval()
-  # i = 0
-  # eval_iterator = tqdm(dev_set.items(), desc="Evaluating")
-  # for (query, choices) in eval_iterator:
-  #   candidates = [choice[0] for choice in choices]
-  #   labels = [choice[1] for choice in choices]
-  #   if sum(labels) == 0: continue
-  #   i += 1
-  #   all_features = encode(tokenizer, query, candidates)
-  #   scores, ranks = rank(model, device, all_features)
-  #   total_mrr += 1/(np.sum(np.array(labels) * ranks) + 1)
-  #   eval_iterator.set_description("Current rank: %s" % ranks[np.argmax(labels)] + " MRR: %s" % (total_mrr / i) + "Total: %s " % len(choices))
+  dev_set = defaultdict(list)
+  with open('./top1000.dev', 'r') as dev_file:
+    for line in tqdm(dev_file, desc='loading dev file'):
+      qid, cid, query, candidate = line.rstrip().split('\t')
+      label = 1 if (qid, cid) in qrels else 0
+      dev_set[query].append((candidate, label, qid))
+  i = 0
+  total_mrr = 0
+  eval_iterator = tqdm(dev_set.items(), desc="Evaluating")
+  for (query, choices) in eval_iterator:
+    candidates = [choice[0] for choice in choices]
+    labels = [choice[1] for choice in choices]
+    if sum(labels) == 0: continue
+    i += 1
+    ranks = model.rank(query, candidates)
+    total_mrr += 1/(np.sum(np.array(labels) * ranks) + 1)
+    eval_iterator.set_description("Current rank: %s" % ranks[np.argmax(labels)] +
+                                  " MRR: %s" % (total_mrr / i) + "Total: %s " % len(choices))
 
 
 def main():
+  from transformers_model import TransformersModel
+  from bert_model import BertModel
   device, model, tokenizer = load_pretrained()
   if args.train:
     train(device, model, tokenizer)
   if args.eval:
-    eval(device, model, tokenizer)
+    if args.model_class == 'bert_model':
+      model = BertModel()
+    else:
+      model = TransformersModel()
+    eval(model)
 
 
 if __name__ == '__main__':
@@ -290,6 +286,7 @@ if __name__ == '__main__':
                       help="Epsilon for Adam optimizer.")
   parser.add_argument("--max_grad_norm", default=1.0, type=float,
                       help="Max gradient norm.")
+  parser.add_argument("--model_class", default='bert_model')
   parser.add_argument("--save_dir", default='./msmarco')
   parser.add_argument("--train", default=False, type=bool)
   parser.add_argument("--eval", default=False, type=bool)
