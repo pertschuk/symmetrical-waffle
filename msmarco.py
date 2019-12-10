@@ -23,7 +23,11 @@ def eval(model):
       i += 1
       if i % args.rerank_num == 0:
         if sum(labels) == 0: continue
-        assert len(set(queries)) == 1
+        try:
+          assert len(set(queries)) == 1
+        except:
+          import pdb
+          pdb.set_trace()
         total += 1
         print('ranking %s' % len(candidates))
         ranks = model.rank(query, candidates)
