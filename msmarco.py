@@ -22,12 +22,12 @@ def eval(model):
       labels.append(int(label))
       i += 1
       if i % args.rerank_num == 0:
-        if sum(labels) == 0: continue
-        try:
-          assert len(set(queries)) == 1
-        except:
-          import pdb
-          pdb.set_trace()
+        if sum(labels) == 0:
+          candidates = []
+          labels = []
+          queries = []
+          continue
+        assert len(set(queries)) == 1
         total += 1
         print('ranking %s' % len(candidates))
         ranks = model.rank(query, candidates)
@@ -41,10 +41,10 @@ def eval(model):
 
 def main():
   if args.model_class == 'bert_model':
-    from bert_model import BertModel
+    from nboost.model import BertModel
     model = BertModel()
   else:
-    from transformers_model import TransformersModel
+    from nboost.model import TransformersModel
     model = TransformersModel()
   eval(model)
 
