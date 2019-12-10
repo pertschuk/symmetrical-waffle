@@ -1,11 +1,4 @@
 import argparse
-from tqdm import tqdm, trange
-import torch
-from transformers import *
-from torch.utils.data import (DataLoader, RandomSampler, SequentialSampler,
-                              TensorDataset)
-import os
-import pathlib
 import numpy as np
 from tqdm import tqdm
 
@@ -36,11 +29,11 @@ def eval(model):
 
 
 def main():
-  from transformers_model import TransformersModel
-  from bert_model import BertModel
   if args.model_class == 'bert_model':
+    from bert_model import BertModel
     model = BertModel()
   else:
+    from transformers_model import TransformersModel
     model = TransformersModel()
   eval(model)
 
