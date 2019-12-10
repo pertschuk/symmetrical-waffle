@@ -16,7 +16,7 @@ def eval(model):
     labels = []
     for line in eval_iterator:
       query, passage, label = line.rstrip().split('\t')
-      candidates += passage
+      candidates.append(passage)
       labels.append(int(label))
       i += 1
       print(i)
