@@ -19,7 +19,6 @@ def eval(model):
       candidates.append(passage)
       labels.append(int(label))
       i += 1
-      print(i)
       if i % args.rerank_num == 0:
         if sum(labels) == 0: continue
         total += 1
@@ -28,7 +27,7 @@ def eval(model):
         total_mrr += 1/(np.sum(np.array(labels) * ranks) + 1)
         eval_iterator.set_description("Current rank: %s" % ranks[np.argmax(labels)] +
                                       " MRR: %s" % (total_mrr / total) + "Total: %s " % len(candidates))
-        candidates = ""
+        candidates = []
         labels = []
 
 
