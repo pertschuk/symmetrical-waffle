@@ -29,7 +29,7 @@ def main():
     for qid, passages in dev_set.items():
       passages = pad_passages(passages)
       for (query, passage, label) in passages:
-        test_set.write(query + '\t' + passage + '\t' + label + '\n')
+        test_set.write(query + '\t' + passage + '\t' + str(label) + '\n')
       i += 1
       if i > 100: break
 
