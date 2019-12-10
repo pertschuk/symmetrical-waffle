@@ -14,7 +14,7 @@ def eval(model):
     candidates = []
     labels = []
     for line in eval_iterator:
-      query, passage, label = line.rstrip.split('\t')
+      query, passage, label = line.rstrip().split('\t')
       candidates += passage
       labels += label
       if sum(labels) == 0: continue
