@@ -5,7 +5,7 @@ RERANK_NUM = 1000
 
 def pad_passages(passages):
   while len(passages) < RERANK_NUM:
-    passages += (passages[0][0], 'FAKE PASSAGE', 0.0)
+    passages.append((passages[0][0], 'FAKE PASSAGE', 0.0))
   return passages
 
 
