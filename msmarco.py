@@ -19,6 +19,7 @@ def eval(model):
       candidates += passage
       labels.append(int(label))
       i += 1
+      print(i)
       if i % args.rerank_num == 0:
         if sum(labels) == 0: continue
         total += 1
