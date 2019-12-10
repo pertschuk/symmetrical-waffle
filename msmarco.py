@@ -14,22 +14,25 @@ def eval(model):
     eval_iterator = tqdm(test_set, desc="Evaluating")
     candidates = []
     labels = []
+    queries = []
     for line in eval_iterator:
       query, passage, label = line.rstrip().split('\t')
+      queries.append(query)
       candidates.append(passage)
       labels.append(int(label))
       i += 1
       if i % args.rerank_num == 0:
         if sum(labels) == 0: continue
+        assert len(set(queries)) == 1
         total += 1
         print('ranking %s' % len(candidates))
-        print(candidates)
         ranks = model.rank(query, candidates)
         total_mrr += 1/(np.sum(np.array(labels) * ranks) + 1)
         eval_iterator.set_description("Current rank: %s" % ranks[np.argmax(labels)] +
                                       " MRR: %s" % (total_mrr / total) + "Total: %s " % len(candidates))
         candidates = []
         labels = []
+        queries = []
 
 
 def main():
