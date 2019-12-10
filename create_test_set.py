@@ -18,25 +18,18 @@ def main():
       qrels.append((qid, cid))
 
   dev_set = defaultdict(list)
-  j = 0
   with open('./top1000.dev', 'r') as top1000_dev:
     for line in top1000_dev:
       qid, cid, query, passage = line.rstrip().split('\t')
       label = 1 if (qid, cid) in qrels else 0
       dev_set[qid].append((query, passage, label))
-      j += 1
-      if j > 10000: break
 
   with open('./test_set.dev', 'w') as test_set:
     i = 0
     for qid, passages in dev_set.items():
       passages = pad_passages(passages)
-      try:
-        for (query, passage, label) in passages:
-          test_set.write(query + '\t' + passage + '\t' + str(label) + '\n')
-      except:
-        import pdb
-        pdb.set_trace()
+      for (query, passage, label) in passages:
+        test_set.write(query + '\t' + passage + '\t' + str(label) + '\n')
       i += 1
       if i > 100: break
 
