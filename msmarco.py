@@ -1,6 +1,7 @@
 import argparse
 import numpy as np
 from tqdm import tqdm
+from nboost.types import Choice
 
 
 def eval(model):
@@ -30,7 +31,8 @@ def eval(model):
         assert len(set(queries)) == 1
         total += 1
         print('ranking %s' % len(candidates))
-        ranks = model.rank(query, candidates)
+        choices = [Choice('0', candidate) for candidate in candidates]
+        ranks = model.rank(query.encode(), choices)
         total_mrr += 1/(np.sum(np.array(labels) * ranks) + 1)
         eval_iterator.set_description("Current rank: %s" % ranks[np.argmax(labels)] +
                                       " MRR: %s" % (total_mrr / total) + "Total: %s " % len(candidates))
