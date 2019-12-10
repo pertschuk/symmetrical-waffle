@@ -80,22 +80,42 @@ class TransformersModel(BaseModel):
     #     if self.train_steps % self.checkpoint_steps == 0:
     #         self.save()
 
-    def rank(self, query, choices):
-        input_ids, attention_mask, token_type_ids = self.encode(query, choices)
+    def batch_input(self, all_features):
+        input_ids_batch = []
+        attention_mask_batch = []
+        token_type_ids_batch = []
+        i = 0
+        for input_ids, attention_mask, token_type_ids in all_features:
+            input_ids_batch.append(input_ids)
+            attention_mask_batch.append(attention_mask)
+            token_type_ids_batch.append(token_type_ids)
+            i += 1
+            if i % self.batch_size == 0:
+                yield input_ids_batch, attention_mask_batch, token_type_ids_batch
+                input_ids_batch = []
+                attention_mask_batch = []
+                token_type_ids_batch = []
+        if len(input_ids_batch) > 0:
+            yield input_ids_batch, attention_mask_batch, token_type_ids_batch
 
+    def rank(self, query, choices):
+        all_features = self.encode(query, choices)
+        ranks = []
         with torch.no_grad():
-            if self.distilbert:
-                logits = self.rerank_model(input_ids, attention_mask=attention_mask)[0]
-            else:
-                logits = self.rerank_model(input_ids,
-                                           attention_mask=attention_mask,
-                                           token_type_ids=token_type_ids)[0]
-            scores = np.squeeze(logits.detach().cpu().numpy())
-            if len(scores.shape) > 1 and scores.shape[1] == 2:
-                scores = np.squeeze(scores[:,1])
-            if len(logits) == 1:
-                scores = [scores]
-            return np.argsort(scores)[::-1]
+            for input_ids, attention_mask, token_type_ids in self.batch_input(all_features):
+                if self.distilbert:
+                    logits = self.rerank_model(input_ids, attention_mask=attention_mask)[0]
+                else:
+                    logits = self.rerank_model(input_ids,
+                                               attention_mask=attention_mask,
+                                               token_type_ids=token_type_ids)[0]
+                scores = np.squeeze(logits.detach().cpu().numpy())
+                if len(scores.shape) > 1 and scores.shape[1] == 2:
+                    scores = np.squeeze(scores[:,1])
+                if len(logits) == 1:
+                    scores = [scores]
+                ranks.extend(np.argsort(scores)[::-1])
+        return ranks
 
     def encode(self, query, choices):
         inputs = [self.tokenizer.encode_plus(
