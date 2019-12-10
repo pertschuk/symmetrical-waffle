@@ -41,7 +41,7 @@ def eval(model):
 
 def main():
   if args.model_class == 'bert_model':
-    from nboost.model import BertModel
+    from nboost.model.bert_model import BertModel
     model = BertModel()
   else:
     from nboost.model import TransformersModel
