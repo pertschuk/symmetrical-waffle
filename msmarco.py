@@ -8,6 +8,7 @@ def eval(model):
   qrels = []
 
   i = 0
+  total = 0
   total_mrr = 0
   with open('test_set.tsv', 'r') as test_set:
     eval_iterator = tqdm(test_set, desc="Evaluating")
@@ -16,14 +17,15 @@ def eval(model):
     for line in eval_iterator:
       query, passage, label = line.rstrip().split('\t')
       candidates += passage
-      labels += label
-      if sum(labels) == 0: continue
+      labels.append(int(label))
       i += 1
       if i % args.rerank_num == 0:
+        if sum(labels) == 0: continue
+        total += 1
         ranks = model.rank(query, candidates)
         total_mrr += 1/(np.sum(np.array(labels) * ranks) + 1)
         eval_iterator.set_description("Current rank: %s" % ranks[np.argmax(labels)] +
-                                      " MRR: %s" % (total_mrr / i) + "Total: %s " % len(candidates))
+                                      " MRR: %s" % (total_mrr / total) + "Total: %s " % len(candidates))
         candidates = ""
         labels = []
 
