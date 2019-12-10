@@ -34,7 +34,7 @@ def eval(model):
         choices = [Choice('0', candidate) for candidate in candidates]
         ranks = model.rank(query.encode(), choices)
         total_mrr += 1/(np.sum(np.array(labels) * ranks) + 1)
-        eval_iterator.set_description("Current rank: %s" % ranks[np.argmax(labels)] +
+        eval_iterator.set_description("Current rank: %s" % np.argmax(np.array(labels)[ranks]) +
                                       " MRR: %s" % (total_mrr / total) + "Total: %s " % len(candidates))
         candidates = []
         labels = []
