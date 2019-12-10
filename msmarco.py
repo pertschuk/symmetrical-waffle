@@ -44,7 +44,7 @@ def main():
     from nboost.model.bert_model import BertModel
     model = BertModel()
   else:
-    from nboost.model import TransformersModel
+    from nboost.model.transformers import TransformersModel
     model = TransformersModel()
   eval(model)
 
