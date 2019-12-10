@@ -14,7 +14,7 @@ def main():
   qrels = []
   with open('./qrels.dev.small.tsv', 'r') as qrels_file:
     for line in qrels_file:
-      qid, cid = line.rstrip().split('\t')
+      qid, _, cid, _ = line.rstrip().split('\t')
       qrels.append((qid, cid))
 
   dev_set = defaultdict(list)
