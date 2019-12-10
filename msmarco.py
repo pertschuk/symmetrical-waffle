@@ -45,10 +45,10 @@ def eval(model):
 def main():
   if args.model_class == 'bert_model':
     from nboost.model.bert_model import BertModel
-    model = BertModel()
+    model = BertModel(model_dir=args.model, batch_size=args.batch_size)
   else:
     from nboost.model.transformers import TransformersModel
-    model = TransformersModel()
+    model = TransformersModel(model_dir=args.model, batch_size=args.batch_size)
   eval(model)
 
 

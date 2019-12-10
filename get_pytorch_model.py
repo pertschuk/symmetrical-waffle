@@ -3,8 +3,8 @@ import os
 
 
 def main():
-  model = BertForSequenceClassification.from_pretrained('bert-base-uncased', cache_dir='./')
-  tokenizer = BertTokenizer.from_pretrained('bert-base-uncased', cache_dir='./')
+  model = BertForSequenceClassification.from_pretrained('bert-base-uncased')
+  tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
   save_dir = './pt_model'
   os.makedirs(save_dir)
   model.save_pretrained(save_dir)
