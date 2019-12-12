@@ -48,7 +48,7 @@ class TransformersModel(BaseModel):
             str(query), str(choice.body), add_special_tokens=True) for choice in choices]
 
         def to_tsv(name, input):
-            return ','.join(input[name])
+            return ','.join([str(f) for f in input[name]])
 
         with open('pt_features.txt', 'w+') as tf_features:
             for input in inputs:
