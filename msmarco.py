@@ -56,7 +56,7 @@ def test_equivilency():
       with TransformersModel(model_dir=args.pt_model, batch_size=args.batch_size) as pt_model:
         _, pt_logits = pt_model.rank(query.encode(), choices)
       try:
-        assert tf_logits == pt_logits
+        np.testing.assert_allclose(tf_logits, pt_logits)
       except:
         import pdb
         pdb.set_trace()

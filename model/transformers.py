@@ -50,7 +50,7 @@ class TransformersModel(BaseModel):
         def to_tsv(name, input):
             return ','.join([str(f) for f in input[name]])
 
-        with open('pt_features.txt', 'w+') as tf_features:
+        with open('pt_features.txt', 'a') as tf_features:
             for input in inputs:
                 tf_features.write(to_tsv('input_ids', input) + '\t'
                                   + to_tsv('token_type_ids', input) + '\n')
