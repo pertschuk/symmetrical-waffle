@@ -52,7 +52,7 @@ class TransformersModel(BaseModel):
 
         with open('pt_features.txt', 'a') as tf_features:
             for input in inputs:
-                tf_features.write(to_tsv('input_ids', input) + '\t'
+                tf_features.write(choices[0].body + '\t' + to_tsv('input_ids', input) + '\t'
                                   + to_tsv('token_type_ids', input) + '\n')
 
         max_len = min(max(len(t['input_ids']) for t in inputs), self.max_seq_len)
@@ -66,7 +66,6 @@ class TransformersModel(BaseModel):
         input_ids = torch.tensor(input_ids).to(self.device, non_blocking=True)
         attention_mask = torch.tensor(attention_mask).to(self.device, non_blocking=True)
         token_type_ids = torch.tensor(token_type_ids).to(self.device, non_blocking=True)
-
 
         return input_ids, attention_mask, token_type_ids
 
