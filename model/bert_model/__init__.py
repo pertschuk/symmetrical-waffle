@@ -185,7 +185,7 @@ class BertModel(BaseModel):
                 def to_tsv(name):
                     return ','.join([str(f) for f in features[name]])
                 with open('tf_features.txt', 'a') as tf_features:
-                    tf_features.write(doc_text + '\t' + to_tsv('input_ids') + '\t'
+                    tf_features.write(query + '\t' + doc_text + '\t' + to_tsv('input_ids') + '\t'
                                       + to_tsv('segment_ids') + '\n')
                 yield features
 

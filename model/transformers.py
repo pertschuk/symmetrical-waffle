@@ -47,6 +47,7 @@ class TransformersModel(BaseModel):
 
     def encode(self, query, choices):
         self.vocab_file = str(self.model_dir.joinpath('vocab.txt'))
+
         tokenizer = tokenization.FullTokenizer(vocab_file=self.vocab_file, do_lower_case=True)
         query = tokenization.convert_to_unicode(str(query))
         query_token_ids = tokenization.convert_to_bert_input(
@@ -82,7 +83,7 @@ class TransformersModel(BaseModel):
             def to_tsv(name):
                 return ','.join([str(f) for f in features[name]])
             with open('pt_features.txt', 'a') as tf_features:
-                tf_features.write(doc_text + '\t' + to_tsv('input_ids') + '\t'
+                tf_features.write(query + '\t' + doc_text + '\t' + to_tsv('input_ids') + '\t'
                                   + to_tsv('segment_ids') + '\n')
 
         max_len = min(max(len(t['input_ids']) for t in all_features), self.max_seq_len)
