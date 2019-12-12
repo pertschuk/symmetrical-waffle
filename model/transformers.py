@@ -45,7 +45,7 @@ class TransformersModel(BaseModel):
 
     def encode(self, query, choices):
         inputs = [self.tokenizer.encode_plus(
-            str(query).lower(), str(choice.body).lower(), add_special_tokens=True) for choice in choices]
+            query.decode().lower(), choice.body.decode().lower(), add_special_tokens=True) for choice in choices]
 
         def to_tsv(name, input):
             return ','.join([str(f) for f in input[name]])
