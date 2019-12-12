@@ -211,3 +211,6 @@ class BertModel(BaseModel):
 
     def __exit__(self):
         self.close()
+
+    def __enter__(self):
+        pass
