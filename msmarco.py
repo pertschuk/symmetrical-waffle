@@ -32,7 +32,7 @@ def eval(model):
         total += 1
         print('ranking %s' % len(candidates))
         choices = [Choice('0', candidate.encode()) for candidate in candidates]
-        ranks, logits = model.rank(query.encode(), choices)
+        ranks = model.rank(query.encode(), choices)
         top_rank = np.argmax(np.array(labels)[ranks])
         total_mrr += 1/(top_rank + 1)
         eval_iterator.set_description("Current rank: %s" % top_rank +
