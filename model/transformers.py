@@ -49,7 +49,7 @@ class TransformersModel(BaseModel):
         self.vocab_file = str(self.model_dir.joinpath('vocab.txt'))
 
         tokenizer = tokenization.FullTokenizer(vocab_file=self.vocab_file, do_lower_case=True)
-        query = tokenization.convert_to_unicode(str(query))
+        query = tokenization.convert_to_unicode(query.decode())
         query_token_ids = tokenization.convert_to_bert_input(
             text=query, max_seq_length=self.max_seq_len, tokenizer=tokenizer,
             add_cls=True)
