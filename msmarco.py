@@ -64,10 +64,10 @@ def main():
     test_equivilency()
     return
   if args.model_class == 'bert_model':
-    from model.bert_model import BertModel
+    from nboost.model.bert_model import BertModel
     model = BertModel(model_dir=args.tf_model, batch_size=args.batch_size)
   else:
-    from model.transformers import TransformersModel
+    from nboost.model.transformers import TransformersModel
     model = TransformersModel(model_dir=args.pt_model, batch_size=args.batch_size)
   eval(model)
 
