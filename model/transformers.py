@@ -95,7 +95,7 @@ class TransformersModel(BaseModel):
         for k, v in batches.items():
             tensors[k] = torch.tensor(v).to(self.device, non_blocking=True)
 
-        return tensors['input_ids'], tensors['attention_mask'], tensors['token_type_ids']
+        return tensors['input_ids'], tensors['attention_mask'], tensors['segment_ids']
 
     def __exit__(self, *args):
         self.rerank_model = None
