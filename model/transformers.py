@@ -45,7 +45,7 @@ class TransformersModel(BaseModel):
 
     def encode(self, query, choices):
         inputs = [self.tokenizer.encode_plus(
-            query.decode().lower(), choice.body.decode().lower(), add_special_tokens=True) for choice in choices]
+            str(query).lower(), str(choice.body).lower(), add_special_tokens=True) for choice in choices]
 
         for input in inputs:
             input['input_ids'] = input['input_ids'][0] + input['input_ids'][3:]
