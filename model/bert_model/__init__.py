@@ -213,4 +213,4 @@ class BertModel(BaseModel):
         self.close()
 
     def __enter__(self, *args):
-        pass
+        return self

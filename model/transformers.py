@@ -74,4 +74,4 @@ class TransformersModel(BaseModel):
         self.rerank_model = None
 
     def __enter__(self, *args):
-        pass
+        return self
