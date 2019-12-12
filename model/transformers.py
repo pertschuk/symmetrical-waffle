@@ -91,7 +91,7 @@ class TransformersModel(BaseModel):
             for k, v in features.items():
                 batches[k].append(v + [0] * (max_len - len(v[:max_len])))
 
-        for k, v in batches:
+        for k, v in batches.items():
             batches[k] = torch.tensor(v).to(self.device, non_blocking=True)
 
         return batches['input_ids'], batches['attention_mask'], batches['token_type_ids']
