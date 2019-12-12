@@ -69,3 +69,6 @@ class TransformersModel(BaseModel):
 
 
         return input_ids, attention_mask, token_type_ids
+
+    def __exit__(self):
+        self.rerank_model = None

@@ -208,3 +208,6 @@ class BertModel(BaseModel):
     def close(self):
         self.input_q.put(None)
         self.model_thread.join()
+
+    def __exit__(self):
+        self.close()
