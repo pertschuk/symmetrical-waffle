@@ -70,8 +70,8 @@ class TransformersModel(BaseModel):
 
         return input_ids, attention_mask, token_type_ids
 
-    def __exit__(self):
+    def __exit__(self, *args):
         self.rerank_model = None
 
-    def __enter__(self):
+    def __enter__(self, *args):
         pass

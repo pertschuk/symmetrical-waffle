@@ -209,8 +209,8 @@ class BertModel(BaseModel):
         self.input_q.put(None)
         self.model_thread.join()
 
-    def __exit__(self):
+    def __exit__(self, *args):
         self.close()
 
-    def __enter__(self):
+    def __enter__(self, *args):
         pass
