@@ -210,6 +210,7 @@ class BertModel(BaseModel):
         self.model_thread.join()
 
     def __exit__(self, *args):
+        self.logger.warning('Exiting tensorflow...')
         self.close()
 
     def __enter__(self, *args):
