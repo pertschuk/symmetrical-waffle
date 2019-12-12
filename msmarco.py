@@ -65,17 +65,18 @@ def main():
     return
   if args.model_class == 'bert_model':
     from model.bert_model import BertModel
-    model = BertModel(model_dir=args.model, batch_size=args.batch_size)
+    model = BertModel(model_dir=args.tf_model, batch_size=args.batch_size)
   else:
     from model.transformers import TransformersModel
-    model = TransformersModel(model_dir=args.model, batch_size=args.batch_size)
+    model = TransformersModel(model_dir=args.pt_model, batch_size=args.batch_size)
   eval(model)
 
 
 if __name__ == '__main__':
   parser = argparse.ArgumentParser()
   parser.add_argument('--eval_steps', default=1000, type=int)
-  parser.add_argument('--model', default='bert-base-uncased-msmarco')
+  parser.add_argument('--tf_model', default='bert-base-uncased-msmarco')
+  parser.add_argument('--pt_model', default='pt-bert-base-uncased-msmarco')
   parser.add_argument('--batch_size', default=8, type=int)
   parser.add_argument('--max_length', default=128, type=int)
   parser.add_argument("--model_class", default='bert_model')
