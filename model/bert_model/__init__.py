@@ -179,7 +179,7 @@ class BertModel(BaseModel):
                     "label_ids": 0
                 }
                 def to_tsv(name):
-                    return ','.join(features[name])
+                    return ','.join([str(f) for f in features[name]])
                 with open('tf_features.txt', 'w+') as tf_features:
                     tf_features.write(to_tsv('input_ids') + '\t'
                                       + to_tsv('segment_ids') + '\n')
