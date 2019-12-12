@@ -41,10 +41,6 @@ def eval(model):
         labels = []
         queries = []
 
-def get_tf_logits(query, choices):
-  from model.bert_model import BertModel
-  with BertModel(model_dir=args.tf_model, batch_size=args.batch_size) as tf_model:
-     return tf_model.rank(query.encode(), choices)
 
 def test_equivilency():
   from model.transformers import TransformersModel
@@ -52,9 +48,11 @@ def test_equivilency():
     for line in test_set:
       query, passage, label = line.rstrip().split('\t')
       choices = [Choice('0', passage)]
-      _, tf_logits = get_tf_logits(query, choices)
-      with TransformersModel(model_dir=args.pt_model, batch_size=args.batch_size) as pt_model:
-        _, pt_logits = pt_model.rank(query.encode(), choices)
+      from model.bert_model import BertModel
+      tf_model = BertModel(model_dir=args.tf_model, batch_size=args.batch_size)
+      pt_model = TransformersModel(model_dir=args.pt_model, batch_size=args.batch_size)
+      _, tf_logits = tf_model.rank(query.encode(), choices)
+      _, pt_logits = pt_model.rank(query.encode(), choices)
       try:
         np.testing.assert_allclose(tf_logits, pt_logits)
       except:
@@ -79,7 +77,7 @@ if __name__ == '__main__':
   parser.add_argument('--eval_steps', default=1000, type=int)
   parser.add_argument('--tf_model', default='bert-base-uncased-msmarco')
   parser.add_argument('--pt_model', default='pt-bert-base-uncased-msmarco')
-  parser.add_argument('--batch_size', default=8, type=int)
+  parser.add_argument('--batch_size', default=1, type=int)
   parser.add_argument('--max_length', default=128, type=int)
   parser.add_argument("--model_class", default='bert_model')
   parser.add_argument("--rerank_num", default=1000, type=int)
