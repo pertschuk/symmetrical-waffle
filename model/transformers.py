@@ -48,8 +48,8 @@ class TransformersModel(BaseModel):
             str(query).lower(), str(choice.body).lower(), add_special_tokens=True) for choice in choices]
 
         for input in inputs:
-            input['input_ids'] = input['input_ids'][0] + input['input_ids'][3:]
-            input['token_type_ids'] = input['token_type_ids'][0] + input['token_type_ids'][3:]
+            input['input_ids'] = [input['input_ids'][0]] + input['input_ids'][3:]
+            input['token_type_ids'] = [input['token_type_ids'][0]] + input['token_type_ids'][3:]
 
         def to_tsv(name, input):
             return ','.join([str(f) for f in input[name]])
