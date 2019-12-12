@@ -6,6 +6,8 @@ from transformers import (
 import torch.nn
 import torch
 from nboost.model.base import BaseModel
+from model.bert_model import tokenization
+from collections import defaultdict
 
 
 class TransformersModel(BaseModel):
@@ -44,34 +46,55 @@ class TransformersModel(BaseModel):
             return np.argsort(scores)[::-1], log_probs
 
     def encode(self, query, choices):
-        inputs = [self.tokenizer.encode_plus(
-            str(query).lower(), str(choice.body).lower(), add_special_tokens=True) for choice in choices]
+        self.vocab_file = str(self.model_dir.joinpath('vocab.txt'))
+        tokenizer = tokenization.FullTokenizer(vocab_file=self.vocab_file, do_lower_case=True)
+        query = tokenization.convert_to_unicode(str(query))
+        query_token_ids = tokenization.convert_to_bert_input(
+            text=query, max_seq_length=self.max_seq_len, tokenizer=tokenizer,
+            add_cls=True)
+        all_features = []
 
-        for input in inputs:
-            input['input_ids'] = [input['input_ids'][0]] + input['input_ids'][3:]
-            input['token_type_ids'] = [input['token_type_ids'][0]] + input['token_type_ids'][3:]
+        for i, choice in enumerate(choices):
+            doc_text = str(choice.body)
+            doc_token_id = tokenization.convert_to_bert_input(
+                text=tokenization.convert_to_unicode(doc_text),
+                max_seq_length=self.max_seq_len - len(query_token_ids),
+                tokenizer=tokenizer,
+                add_cls=False)
 
-        def to_tsv(name, input):
-            return ','.join([str(f) for f in input[name]])
+            query_ids = query_token_ids
+            doc_ids = doc_token_id
+            input_ids = query_ids + doc_ids
 
-        with open('pt_features.txt', 'a') as tf_features:
-            for input in inputs:
-                tf_features.write(choices[0].body + '\t' + to_tsv('input_ids', input) + '\t'
-                                  + to_tsv('token_type_ids', input) + '\n')
+            query_segment_id = [0] * len(query_ids)
+            doc_segment_id = [1] * len(doc_ids)
+            segment_ids = query_segment_id + doc_segment_id
 
-        max_len = min(max(len(t['input_ids']) for t in inputs), self.max_seq_len)
-        input_ids = [t['input_ids'][:max_len] +
-                     [0] * (max_len - len(t['input_ids'][:max_len])) for t in inputs]
-        attention_mask = [[1] * len(t['input_ids'][:max_len]) +
-                          [0] * (max_len - len(t['input_ids'][:max_len])) for t in inputs]
-        token_type_ids = [t['token_type_ids'][:max_len] +
-                     [0] * (max_len - len(t['token_type_ids'][:max_len])) for t in inputs]
+            input_mask = [1] * len(input_ids)
 
-        input_ids = torch.tensor(input_ids).to(self.device, non_blocking=True)
-        attention_mask = torch.tensor(attention_mask).to(self.device, non_blocking=True)
-        token_type_ids = torch.tensor(token_type_ids).to(self.device, non_blocking=True)
+            features = {
+                "input_ids": input_ids,
+                "segment_ids": segment_ids,
+                "attention_mask": input_mask,
+            }
+            all_features.append(features)
 
-        return input_ids, attention_mask, token_type_ids
+            def to_tsv(name):
+                return ','.join([str(f) for f in features[name]])
+            with open('pt_features.txt', 'a') as tf_features:
+                tf_features.write(doc_text + '\t' + to_tsv('input_ids') + '\t'
+                                  + to_tsv('segment_ids') + '\n')
+
+        max_len = min(max(len(t['input_ids']) for t in all_features), self.max_seq_len)
+        batches = defaultdict(list)
+        for features in all_features:
+            for k, v in features.items():
+                batches[k].append(v + [0] * (max_len - len(v[:max_len])))
+
+        for k, v in batches:
+            batches[k] = torch.tensor(v).to(self.device, non_blocking=True)
+
+        return batches['input_ids'], batches['attention_mask'], batches['token_type_ids']
 
     def __exit__(self, *args):
         self.rerank_model = None
