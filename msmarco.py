@@ -45,14 +45,16 @@ def eval(model):
 def test_equivilency():
   from model.bert_model import BertModel
   from model.transformers import TransformersModel
-  tf_model = BertModel(model_dir=args.tf_model, batch_size=args.batch_size)
-  pt_model = TransformersModel(model_dir=args.pt_model, batch_size=args.batch_size)
   with open('test_set.tsv', 'r') as test_set:
     for line in test_set:
       query, passage, label = line.rstrip().split('\t')
       choices = [Choice('0', passage)]
-      _, tf_logits = tf_model.rank(query.encode(), choices)
-      _, pt_logits = pt_model.rank(query.encode(), choices)
+
+      with BertModel(model_dir=args.tf_model, batch_size=args.batch_size) as tf_model:
+        _, tf_logits = tf_model.rank(query.encode(), choices)
+      with TransformersModel(model_dir=args.pt_model, batch_size=args.batch_size) as pt_model:
+        _, pt_logits = pt_model.rank(query.encode(), choices)
+
       try:
         assert tf_logits == pt_logits
       except:
