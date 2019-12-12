@@ -192,7 +192,7 @@ class BertModel(BaseModel):
             candidates += ['PADDING DOC'] * (self.batch_size - (len(candidates) % self.batch_size))
             return candidates
 
-    def rank(self, query: bytes, choices: List[Choice]) -> List[int]:
+    def rank(self, query: bytes, choices: List[Choice]) -> (List[int], List[int]):
         bodies = [choice.body for choice in choices]
         actual_length = len(bodies)
         candidates = self.pad(bodies)
