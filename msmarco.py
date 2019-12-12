@@ -42,12 +42,32 @@ def eval(model):
         queries = []
 
 
+def test_equivilency():
+  from model.bert_model import BertModel
+  from model.transformers import TransformersModel
+  tf_model = BertModel(model_dir=args.model, batch_size=args.batch_size)
+  pt_model = TransformersModel(model_dir=args.model, batch_size=args.batch_size)
+  with open('test_set.tsv', 'r') as test_set:
+    for line in test_set:
+      query, passage, label = line.rstrip().split('\t')
+      choices = [Choice('0', passage)]
+      _, tf_logits = tf_model.rank(query.encode(), choices)
+      _, pt_logits = pt_model.rank(query.encode(), choices)
+      try:
+        assert tf_logits == pt_logits
+      except:
+        import pdb
+        pdb.set_trace()
+
 def main():
+  if args.test_eq:
+    test_equivilency()
+    return
   if args.model_class == 'bert_model':
-    from nboost.model.bert_model import BertModel
+    from model.bert_model import BertModel
     model = BertModel(model_dir=args.model, batch_size=args.batch_size)
   else:
-    from nboost.model.transformers import TransformersModel
+    from model.transformers import TransformersModel
     model = TransformersModel(model_dir=args.model, batch_size=args.batch_size)
   eval(model)
 
@@ -60,5 +80,6 @@ if __name__ == '__main__':
   parser.add_argument('--max_length', default=128, type=int)
   parser.add_argument("--model_class", default='bert_model')
   parser.add_argument("--rerank_num", default=1000, type=int)
+  parser.add_argument('--test_eq', action='store_true')
   args = parser.parse_args()
   main()
